@@ -1,0 +1,87 @@
+---
+- hosts: "{{ target_http }}"
+  gather_facts: no
+  vars:
+    http_config_file: "config/{{ survey_service_http }}_config.yml"
+    service_main_config_file: "config/{{ survey_service }}_config.yml"
+
+  vars_files:
+  - "{{ service_main_config_file }}"
+
+  ##########
+  # Modify #
+  ##########
+
+  tasks:
+  - name: Load the config file for the service ** {{ survey_service_http }} **
+    include_vars: 
+       file: "{{ http_config_file }}"
+       name: aux
+
+  - name: Before add the line, try to delete, to no duplicate it.
+    lineinfile:
+       path: "{{ service_main_config_file }}"
+       line: "   - { host: {{ inventory_hostname }}, port: {{ aux.service_config_var_listen_port }} }"
+       state: absent
+    delegate_to: localhost
+
+  - name: Adding host ** {{ target }} ** to HA-PROXY config
+    lineinfile:
+       path: "{{ service_main_config_file }}"
+       line: "   - { host: {{ inventory_hostname }}, port: {{ aux.service_config_var_listen_port }} }"
+       insertafter: 'service_config_var_backend.*'
+    delegate_to: localhost
+    when: survey_action == "ADD"
+
+  ######## 
+  # Push #
+  ########
+
+- hosts: tower.rhforum.com
+  gather_facts: yes
+  become: yes
+  vars:
+    rootDirectory: "/root/{{ ansible_date_time.epoch }}"
+
+  tasks:
+  - name: Creating directory to clone the repository
+    file: state=directory path="{{ rootDirectory }}"
+
+  - name: Creating directory ./git
+    file: state=directory path="{{ rootDirectory }}/.git"
+
+  - name: Coping git config file
+    copy: src=.git/config dest="{{ rootDirectory }}/.git"
+
+  - name: Adding [user] section to Git config file
+    shell: git config user.name rhforum ; git config user.email rhforum@domain.com
+    args:
+      chdir: "{{ rootDirectory }}"
+
+  - name: Getting Git URL 
+    shell: grep url config | awk -F= '{print $2}' | sed -s 's/ //g'
+    args:
+      chdir: "{{ rootDirectory }}/.git"
+    register: git_url
+
+  - name: Getting repo dir
+    shell: grep url config | awk -F= '{print $2}' | awk -F.git '{print $2}' | awk -F/ '{print $3}'
+    args:
+      chdir: "{{ rootDirectory }}/.git"
+    register: git_dir
+
+  - name: Clonning the repo
+    shell: git clone "{{ git_url.stdout }}"
+    args:
+      chdir: "{{ rootDirectory }}"
+
+  - name: Coping config directory 
+    copy: src=config/ dest="{{ rootDirectory }}/{{ git_dir.stdout }}/config"
+
+  - name: Run push to Git
+    shell: ./push.bash
+    args: 
+      chdir: "{{ rootDirectory}}/{{ git_dir.stdout }}"
+
+  - name: Delete temporary repo
+    file: state=absent path="{{ rootDirectory }}"

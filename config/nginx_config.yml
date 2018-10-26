@@ -1,0 +1,28 @@
+---
+# Software repo config
+service_software_repo_name: localrepo
+service_software_repo_url: http://localrepo.rhforum.com/
+
+# Service name string and service OS name
+service_name: NGINX
+service_os_name: rh-nginx18-nginx
+
+# Software needed to install the service
+service_pkgs: ['rh-nginx18']
+
+# Config file vars. We need the template and the destination file
+service_config_main_file: /etc/opt/rh/rh-nginx18/nginx/nginx.conf
+
+service_config_files:
+   - { template: ./templates/nginx_template.conf.j2, config: /etc/opt/rh/rh-nginx18/nginx/nginx.conf }
+
+# Vars to configure the service 
+service_config_var_listen_port: 80
+service_config_var_document_root: /opt/rh/rh-nginx18/root/usr/share/nginx/html
+
+# Status on boot
+service_onboot: on
+
+# Service status after the deploy
+service_status: start
+...

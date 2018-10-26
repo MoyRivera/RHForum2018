@@ -1,0 +1,28 @@
+---
+# Software repo config
+service_software_repo_name: localrepo
+service_software_repo_url: http://localrepo.rhforum.com/
+
+# Service name string and service OS name
+service_name: Apache
+service_os_name: httpd
+
+# Software needed to install the service
+service_pkgs: ['httpd', 'apr', 'apr-util', 'httpd-tools', 'mailcap']
+
+# Config file vars. We need the template and the destination file
+service_config_main_file: /etc/httpd/conf/httpd.conf
+
+service_config_files:
+   - { template: ./templates/apache_template.conf.j2, config: /etc/httpd/conf/httpd.conf }
+
+# Vars to configure the service 
+service_config_var_listen_port: 80
+service_config_var_document_root: /var/www/html
+
+# Service status after the deploy
+service_status: start
+
+# Status on boot
+service_onboot: on
+...

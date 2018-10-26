@@ -1,0 +1,14 @@
+---
+- hosts: "{{ target }}"
+  become: yes
+  gather_facts: yes
+  vars:
+    service_main_config_file: "config/{{ survey_service }}_config.yml"
+
+  vars_files:
+    - "{{ service_main_config_file }}"
+
+  tasks:
+  - name: Applying configuration for service ** {{ service_name }} **
+    template: src={{ item.template }} dest={{ item.config }}
+    with_items: "{{ service_config_files }}"

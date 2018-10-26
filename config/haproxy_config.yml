@@ -1,0 +1,31 @@
+---
+# Software repo config
+service_software_repo_name: localrepo
+service_software_repo_url: http://localrepo.rhforum.com/
+
+# Service name string and service OS name
+service_name: HA-PROXY
+service_os_name: haproxy
+
+# Software needed to install the service
+service_pkgs: ['haproxy']
+
+# Config file vars. We need the template and the destination file
+service_config_main_file: /etc/haproxy/haproxy.cfg
+
+service_config_files:
+   - { template: ./templates/haproxy_template.conf.j2, config: /etc/haproxy/haproxy.cfg }
+
+# Vars to configure the service 
+service_config_var_listen_port: 80
+
+service_config_var_backend:
+   - { host: web2.rhforum.com, port: 80 }
+   - { host: web1.rhforum.com, port: 80 }
+
+# Service status after the deploy
+service_status: start
+
+# Status on boot
+service_onboot: on
+...

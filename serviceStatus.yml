@@ -1,0 +1,26 @@
+---
+- hosts: "{{ target }}"
+  become: yes
+  gather_facts: no
+  vars:
+    service_main_config_file: "config/{{ survey_service }}_config.yml"
+
+  vars_files:
+  - "{{ service_main_config_file }}"
+
+  tasks:
+  - name: Starting service ** {{ service_name }} **
+    service: name="{{ service_os_name }}" state=started
+    when: service_status == "start"
+
+  - name: Stopping service ** {{ service_name }} **
+    service: name="{{ service_os_name }}" state=stopped
+    when: service_status == "stop"
+
+  - name: Restarting service ** {{ service_name }} **
+    service: name="{{ service_os_name }}" state=restarted
+    when: service_status == "restart"
+
+  - name: Reloading service ** {{ service_name }} **
+    service: name="{{ service_os_name }}" state=reloaded
+    when: service_status == "reload"

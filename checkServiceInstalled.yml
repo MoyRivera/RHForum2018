@@ -1,0 +1,15 @@
+---
+- hosts: "{{ target_http }}"
+  gather_facts: no
+  vars:
+    service_main_config_file: "config/{{ survey_service_http }}_config.yml"
+
+  vars_files:
+  - "{{ service_main_config_file }}"
+
+  tasks:
+  - name: Checking if {{ inventory_hostname }} has {{ service_name }} installed
+    shell: rpm -qi {{ item }}
+    args:
+      warn: no
+    with_items: "{{ service_pkgs }}"

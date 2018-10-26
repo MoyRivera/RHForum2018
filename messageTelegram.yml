@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars_files:
+  - config/telegram_config.yml
+
+  tasks:
+
+  - uri: url="https://api.telegram.org/{{ tokenBot }}/sendmessage?chat_id={{ chatID }}&parse_mode=HTML&text=SSH terminal interactive for <b>{{ target }} [{{ tty_on_off }}]</b> - {{ survey_message }}"

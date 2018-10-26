@@ -1,0 +1,22 @@
+---
+- hosts: "{{ target }}"
+  become: yes
+  gather_facts: no
+
+  handlers: 
+  - name: restart ssh
+    service: name=sshd state=restarted
+
+  tasks:
+  - name: Configuring SSH...
+    lineinfile: dest=/etc/ssh/sshd_config regexp='^PermitTTY' state=absent
+
+  - name:  ... activating SSH using TTY
+    lineinfile: dest=/etc/ssh/sshd_config line='PermitTTY yes' state=present
+    notify: restart ssh
+    when: tty_on_off == "ON"
+
+  - name: ... deactivating SSH using TTY
+    lineinfile: dest=/etc/ssh/sshd_config line='PermitTTY no' state=present
+    notify: restart ssh
+    when: tty_on_off == "OFF"

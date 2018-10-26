@@ -1,0 +1,11 @@
+---
+- hosts: "{{ target_http }}"
+  gather_facts: no
+  vars:
+    service_main_config_file: "config/{{ survey_service_http }}_config.yml"
+
+  vars_files:
+  - "{{ service_main_config_file }}"
+
+  tasks:
+  - debug: msg="--- E R R O R --- {{ inventory_hostname }} DON'T HAVE {{ service_name }} INSTALLED ---"

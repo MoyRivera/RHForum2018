@@ -1,0 +1,19 @@
+---
+- hosts: "{{ target }}"
+  become: yes
+  gather_facts: no
+  vars:
+    service_main_config_file: "config/{{ survey_service }}_config.yml"
+
+  vars_files:
+  - "{{ service_main_config_file }}"
+
+  tasks:
+
+  - name: Enabling service ** {{ service_name }} ** on boot
+    service: name="{{ service_os_name }}" enabled=yes
+    when: service_onboot == True
+
+  - name: Disabling service ** {{ service_name }} ** on boot
+    service: name="{{ service_os_name }}" enabled=no
+    when: service_onboot == False
